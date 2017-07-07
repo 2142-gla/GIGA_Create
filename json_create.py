@@ -154,15 +154,15 @@ def edgeJSON(text, link):
 #   Open a file to make the json file
 #   Input: None
 #   Output: file object
-def createJS():
+def createJS(filename):
     try:
-        jsFile = open("eviNetwork02.cyjs", 'w')
+        jsFile = open(filename, 'w')
         return jsFile
     except:
         print ("Can't create file!")
         exit()
 
-def main(fcDiction, geDiction):
+def main(fcDiction, geDiction, filename):
     # Variables to hold part of the json text
     top = '{\n\t"elements" : {\n'
     nodetop = '\t\t"nodes" : [\n'
@@ -191,7 +191,7 @@ def main(fcDiction, geDiction):
     geneDiction = geDiction
 
     # Create the JSON file
-    jsFile = createJS()
+    jsFile = createJS(filename)
 
     # print out and create json file
     print(top, end='')

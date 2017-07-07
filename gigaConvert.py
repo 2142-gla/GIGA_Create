@@ -16,9 +16,9 @@ import re
     Input - none
     Output - file object
 '''
-def openTxt():
+def openTxt(outTxt):
     try:
-        txtFile = open("outTxt.txt", "r")
+        txtFile = open(outTxt, "r")
         return txtFile
     except:
         print ("Sorry, default file not found.")
@@ -29,9 +29,9 @@ def openTxt():
     Input - none
     Output - file object
 '''
-def openGDL():
+def openGDL(outGDL):
     try:
-        gdlFile = open("out.gdl", "r")
+        gdlFile = open(outGDL, "r")
         return gdlFile
     except:
         print("Sorry, file not found.")
@@ -41,7 +41,7 @@ def openGDL():
 ''' 
 Main code block to fill dictionaries
 '''
-def mainGiga():
+def mainGiga(outTxt, outGDL):
     # Main code block
 
     # Variables
@@ -72,7 +72,7 @@ def mainGiga():
 
 
     # Open the Default text output
-    txtOut = openTxt()
+    txtOut = openTxt(outTxt)
 
     # gene_dict[gene title]:[id, gene ontology information, overall rank of the gene]
     # Work through txtOut and get information on the genes and what genes are in which functional classes
@@ -151,7 +151,7 @@ def mainGiga():
     txtOut.close()
 
     # Open gdl file and build network between genes(nodes) in functional classes
-    gdlOut = openGDL()
+    gdlOut = openGDL(outGDL)
 
     # id for the edges
     edgeID = geneID + 1
