@@ -69,10 +69,13 @@ def makeGraph(index, key, funClasses, omiDiction):
     # HTML for graph
     graphHTML = """
         <div align="center">
+            <br/>
+            <h2>Subgraph {}</h2>
+            <br/>
             <img src="{}" width="75%" border="1px"/>
             <p>Omicron Network anchored on omicron {}</p>
-        </div>""".format(graphName, key)
-    print(graphHTML)
+        </div>""".format(indName, graphName, key)
+    #print(graphHTML)
 
     #   Pass the graph to make the nodes table - need this for the weight information.
     # Make the node table text
@@ -92,7 +95,7 @@ def nodeTable(key, funClasses, omiDiction, graph):
     	<table border="2">
     		<tr>
     			<td colspan="4">Information on each omicon in network</td>
-    			<td colspan="2">Rank</td>
+    			<td colspan="2" align="center">Rank</td>
     		</tr>
     		<tr>
     			<td>Index</td>
@@ -105,7 +108,7 @@ def nodeTable(key, funClasses, omiDiction, graph):
     		"""
 
     nodehtml = nodehead
-
+    # Add information for each row
     for omi in funClasses[key][2]:
         index = omi[2]
         label = omi[0]
@@ -127,9 +130,12 @@ def nodeTable(key, funClasses, omiDiction, graph):
     # close of node table div
     nodehtml = nodehtml + """
 	</table>
+	<br />
+	<hr width="75%">
+	<br />
 </div>"""
 
-    print (nodehtml)
+    #print (nodehtml)
 
     return nodehtml
 
@@ -155,8 +161,9 @@ def main (funClasses, omiDiction, filename):
         <body>
             <h1 align="center">GIGA Omicron Networks</h1>
             <hr width="75%">
+            <br/>
     """
-    print(head)
+    #print(head)
     htmlFile.write(head)
 
     # Add head information to the html fil
