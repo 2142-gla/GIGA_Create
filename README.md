@@ -1,4 +1,4 @@
 # GIGA_Create
-Create graph file and html description of GIGA results
+Create omicron network graph file and html description of GIGA results
 
-Working on accepting arguments using argparse module
+Will accept arguments using argparse module.
