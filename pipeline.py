@@ -22,7 +22,7 @@ def main(args):
     found = [True, True, True]
 
     # Name to be used for all future files
-    out = args.out
+    fileName = args.out
 
     # If default called use the yeast files instead
     if args.default:
@@ -31,7 +31,7 @@ def main(args):
         namesAddress = "-GYeastGeneAnnot.txt"
         outTxt = "-OoutTxt.txt"
         outGDL = "-OoutGDL.gdl"
-        out = "DelRisi"
+        fileName = "DelRisi"
     else:
         #   Load arguments into variables
         dataAddress = "-I" + args.data
@@ -84,11 +84,13 @@ def main(args):
     # extract giga.pl information into dictionaries
     gigaConvert.mainGiga(outTxt, outGDL)
     funClasses = gigaConvert.retFC()
-    geneDiction = gigaConvert.retGD()
+    omiDiction = gigaConvert.retGD()
+
+
 
     #   Unless flagged make html summary page
     if not args.nohtml:
-        htmlgraphs.main(funClasses, geneDiction, out)
+        htmlgraphs.main(funClasses, omiDiction, fileName)
         # Open the html in a browser
     #
     # # If only making the html file skip making the graph files
@@ -97,9 +99,9 @@ def main(args):
     #     if not args.gml:
     #         # Need to use argument name for filename
     #         outJson = args.out + ".cyjs"
-    #         json_create.main(funClasses, geneDiction, outJson)
+    #         json_create.main(funClasses, omiDiction, outJson)
     #         # Build the key file in text
-    #         key.buildTxt(funClasses, geneDiction)
+    #         key.buildTxt(funClasses, omiDiction)
     #         # Open cytoscope with file
     #         # java -Xmx512M -jar cytoscape.jar [OPTIONS]
     #         # -N,--network <file>     Load a network file (any format)

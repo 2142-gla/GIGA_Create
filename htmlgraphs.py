@@ -8,9 +8,9 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 # Get a gene name from an id
-def getName(id, omicrons):
-    for key in omicrons:
-        if id in omicrons[key]:
+def getName(id, omiDiction):
+    for key in omiDiction:
+        if id in omiDiction[key]:
             return key
     return '-1'
 
@@ -25,7 +25,7 @@ def createFile(filename):
         exit()
 
 # Make the graph
-def makeGraph(index, key, funClasses, omicrons):
+def makeGraph(index, key, funClasses, omiDiction):
     # Make a graph object from the data dictionaries
     graph = nx.MultiGraph()
 
@@ -47,8 +47,8 @@ def makeGraph(index, key, funClasses, omicrons):
     edgesList = funClasses[key][1]
 
     for edge in edgesList:
-        n1 = getName(edge[0], geneDiction)
-        n2 = getName(edge[1], geneDiction)
+        n1 = getName(edge[0], omiDiction)
+        n2 = getName(edge[1], omiDiction)
         graph.add_edge(n1, n2)
 
     #print(graph.edges())
@@ -76,29 +76,68 @@ def makeGraph(index, key, funClasses, omicrons):
 
     #   Pass the graph to make the nodes table - need this for the weight information.
     # Make the node table text
-
+    nodehtml = nodeTable(key, funClasses, omiDiction, graph)
 
     # Make the edge table text
 
     # return the html to main
+    return [graphHTML, nodehtml]
 
 # Make the node table
-def nodeTable(key, funClasses, omicrons, graph):
+def nodeTable(key, funClasses, omiDiction, graph):
     print("nodes!")
+    nodehead = """<div>
+    	<!-- Table of information about each node -->
+    	<h2>Omicon Description</h2>
+    	<table border="2">
+    		<tr>
+    			<td colspan="4">Information on each omicon in network</td>
+    			<td colspan="2">Rank</td>
+    		</tr>
+    		<tr>
+    			<td>Index</td>
+    			<td>Label</td>
+    			<td>Description of omicron</td>
+    			<td>Weight</td>
+    			<td>Overall</td>
+    			<td>Network</td>
+    		</tr>
+    		"""
+
+    nodehtml = nodehead
 
     for omi in funClasses[key][2]:
         index = omi[2]
         label = omi[0]
-        description = omicrons[label][1]
-        #weight
-        ovRank = omicrons[label][2]
+        description = omiDiction[label][1]
+        weight = omiDiction[label][3]
+        ovRank = omiDiction[label][2]
         onRank = omi[1]
+        nodeRow = """
+        		<tr>
+			<td>{:03}</td>
+			<td>{}</td>
+			<td>{}</td>
+			<td align="center">{}</td>
+			<td align="center">{}</td>
+			<td align="center">{}</td>
+		</tr>""".format(index, label, description, weight, ovRank, onRank)
+        nodehtml = nodehtml + nodeRow
+
+    # close of node table div
+    nodehtml = nodehtml + """
+	</table>
+</div>"""
+
+    print (nodehtml)
+
+    return nodehtml
 
 
 
 
 # Main function receives the two data dictionaries
-def main (funClasses, omicrons, filename):
+def main (funClasses, omiDiction, filename):
     # Start
     print ('Main')
 
@@ -118,6 +157,7 @@ def main (funClasses, omicrons, filename):
             <hr width="75%">
     """
     print(head)
+    htmlFile.write(head)
 
     # Add head information to the html fil
 
@@ -128,7 +168,9 @@ def main (funClasses, omicrons, filename):
     for i, key in enumerate(funClasses):
         #   Make graph and add to html
         #print ("graph:", i)
-        makeGraph(i, key, funClasses, geneDiction)
+        node = makeGraph(i, key, funClasses, omiDiction)
+        htmlFile.write(node[0])
+        htmlFile.write(node[1])
         # Pass the key and index plus one
         #   Make node table and add to html
         #print("node table:" , i)
@@ -142,5 +184,8 @@ def main (funClasses, omicrons, filename):
         </body>
     </html>
     """
+    htmlFile.write(tail)
+
+    htmlFile.close()
 
     #

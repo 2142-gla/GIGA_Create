@@ -6,90 +6,90 @@ Take GIGA information and create a JSON file suitable for Cytoscape
 """
 
 # Make a json file
-def nodeJSON(node, gene):
+def nodeJSON(node, omicron):
     # Make nodes
-    # if gene is a key in funClasses then it is a an anchor gene\
-    idnum = geneDiction[gene][0]
-    name = gene
-    description = geneDiction[gene][1]
-    shape = shapeNode(gene)
-    colour = colorNode(gene)
+    # if omicron is a key in funClasses then it is a an anchor omicron\
+    idnum = omiDiction[omicron][0]
+    name = omicron
+    description = omiDiction[omicron][1]
+    shape = shapeNode(omicron)
+    colour = colorNode(omicron)
 
-    geneDetails = [gd for gd in funClasses[getFC(gene)[0]][2] if gene in gd][0]
-    print (geneDetails)
-    rankAll = geneDiction[gene][2]
-    rankFC = geneDetails[1]
+    omicronDetails = [gd for gd in funClasses[getFC(omicron)[0]][2] if omicron in gd][0]
+    print (omicronDetails)
+    rankAll = omiDiction[omicron][2]
+    rankFC = omicronDetails[1]
 
-    meta = str(geneDetails[2]) + ": "+ geneDiction[gene][1]
+    meta = str(omicronDetails[2]) + ": "+ omiDiction[omicron][1]
 
     # node: id, name, description, shape, background colour, transparency, meta information
     #print ((node) % (idnum, name, description, shape, colour[0], colour[1], meta))
     return ((node) % (idnum, name, description, rankAll, rankFC, shape, colour[0], colour[1], meta))
 
-#   Check of the gene is a anchor gene
-#   Input: name of the gene
+#   Check of the omicron is a anchor omicron
+#   Input: name of the omicron
 #   Output: Shape of the node
-def shapeNode(gene):
+def shapeNode(omicron):
     anchors = [anchor for anchor in funClasses]
-    if gene in anchors:
+    if omicron in anchors:
         return "Rounded Rectangle"
     else:
         return "Ellipse"
 
-#   From a gene title get the functional classes it belongs to. The functional class are sorted by smallest p
-#   Input: gene title
+#   From a omicron title get the functional classes it belongs to. The functional class are sorted by smallest p
+#   Input: omicron title
 #   Output: list of names of functional classes
-def getFC(gene):
+def getFC(omicron):
     fcGroup = []
-    # Check if gene is in the geneList of each Functional Class
+    # Check if omicron is in the omicronList of each Functional Class
     for key in funClasses:
-        # If gene found in gene list add the name of the functional class to the fcGroup
-        if any(gene in genelist for genelist in funClasses[key][2]):
+        # If omicron found in omicron list add the name of the functional class to the fcGroup
+        if any(omicron in omicronlist for omicronlist in funClasses[key][2]):
             fcGroup.append(key)
-        #     print(gene, "found")
+        #     print(omicron, "found")
         # else:
-        #     print (gene,"not found")
+        #     print (omicron,"not found")
     #print ("getFC", fcGroup)
     return fcGroup
 
-# #   Create the metadata for the tooltip. This will depend on wither the gene is a anchor or normal gene
-# #   Input: gene and shape
+# #   Create the metadata for the tooltip. This will depend on wither the omicron is a anchor or normal omicron
+# #   Input: omicron and shape
 # #   Output: string format for meta data
-# def metaNode(gene, shape):
+# def metaNode(omicron, shape):
 #     #print ('metaNode calls getFC')
-#     fcGroup = getFC(gene)
+#     fcGroup = getFC(omicron)
 #
 #     # Need to calculate rank in fc
-#     genels = funClasses[fcGroup[0]][2]
-#     # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-#     rank = int([i[1] for i in genels if i[0] == gene][0])
+#     omicronls = funClasses[fcGroup[0]][2]
+#     # Get the rank in functional class for the omicron in the main functional class int(funClasses[fcomicron][2])
+#     rank = int([i[1] for i in omicronls if i[0] == omicron][0])
 #     m = 0
 #
 #     if shape == "Ellipse" and len(fcGroup) > 1:
-#         metaFor = ("%s Rank of Gene Overall: %s ") % (gene, geneDiction[gene][2])
+#         metaFor = ("%s Rank of omicron Overall: %s ") % (omicron, omiDiction[omicron][2])
 #         for fc in fcGroup:
-#             genels = funClasses[fcGroup[m]][2]
-#             # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-#             rank = int([i[1] for i in genels if i[0] == gene][0])
+#             omicronls = funClasses[fcGroup[m]][2]
+#             # Get the rank in functional class for the omicron in the main functional class int(funClasses[fcomicron][2])
+#             rank = int([i[1] for i in omicronls if i[0] == omicron][0])
 #             addMeta = " Rank in Functional Class %s: %s. " % (fc, funClasses[fc][2][1])
 #             metaFor = metaFor + addMeta
 #             m += 1
 #     elif shape == "Ellipse":
-#         metaFor = "%s Rank of Gene Overall: %s. Rank in Functional Class %s: %s"
-#         metaFor = metaFor % (geneDiction[gene][1], geneDiction[gene][2], fcGroup[0], rank)
+#         metaFor = "%s Rank of omicron Overall: %s. Rank in Functional Class %s: %s"
+#         metaFor = metaFor % (omiDiction[omicron][1], omiDiction[omicron][2], fcGroup[0], rank)
 #     else:
-#         metaFor = "Subgraph Description: %s. P value: %s. Number of Genes in Class: %s. "
+#         metaFor = "Subgraph Description: %s. P value: %s. Number of omicrons in Class: %s. "
 #         metaFor = metaFor % (funClasses[fcGroup[0]][0][0], funClasses[fcGroup[0]][0][1], rank)
-#         anchor = "Anchor gene description %s Rank of Gene Overall: %s. Rank in Functional Class %s: %s."
-#         anchor = anchor % (geneDiction[gene][1], geneDiction[gene][2], fcGroup[0], rank)
+#         anchor = "Anchor omicron description %s Rank of omicron Overall: %s. Rank in Functional Class %s: %s."
+#         anchor = anchor % (omiDiction[omicron][1], omiDiction[omicron][2], fcGroup[0], rank)
 #         metaFor = metaFor + anchor
 #
 #     return metaFor
 
 #   Creates the colour of the node based on the PC value of the Functional Class and rank in the class
-#   Input: name of the gene
+#   Input: name of the omicron
 #   Output: a list containing rgb of list of the colour and value of the transparency.
-def colorNode(gene):
+def colorNode(omicron):
     # dictionary of colour blind safe colours
     colors = {"Vermillion": [213, 94, 0], "Orange": [230, 159, 0], "Yellow": [240, 228, 66],
               "Bluish Green": [0, 158, 115], "Blue": [0, 114, 178], "Sky Blue": [86, 189, 233],
@@ -97,32 +97,32 @@ def colorNode(gene):
     colList = ["Vermillion", "Orange", "Yellow", "Bluish Green", "Sky Blue", "Blue", "Reddish purple"]
     transpLst = [255, 200, 175, 150, 125, 100, 75, 50, 25]
 
-    # Get the main functional class a gene belongs to
-    fcGene = getFC(gene)[0]
+    # Get the main functional class a omicron belongs to
+    fcomicron = getFC(omicron)[0]
     # rank of function class in evidence network (based on PC value)
     posFC = 1
     for anchor in funClasses:
-        if fcGene == anchor:
+        if fcomicron == anchor:
             break
         else:
             posFC += 1
     # Variables
     transp = 255
     rgb = []
-    genels = funClasses[fcGene][2]
-    # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-    rank = int([i[1] for i in genels if i[0] == gene][0])
-    totalNumGene = funClasses[fcGene][0][3]
+    omicronls = funClasses[fcomicron][2]
+    # Get the rank in functional class for the omicron in the main functional class int(funClasses[fcomicron][2])
+    rank = int([i[1] for i in omicronls if i[0] == omicron][0])
+    totalNumomicron = funClasses[fcomicron][0][3]
     numOfFc = len(funClasses)
     color = ""
-    # position of gene in subgraph/functional class
-    genePos = [m[2] for m in funClasses[fcGene][2] if gene == m[0]][0]
+    # position of omicron in subgraph/functional class
+    omicronPos = [m[2] for m in funClasses[fcomicron][2] if omicron == m[0]][0]
 
     # Color of the Functional Class
     if posFC <= 7:
         rgb = colors[(colList[posFC - 1])]
-        if (genePos-1) < 9:
-            transp = transpLst[genePos - 1]
+        if (omicronPos-1) < 9:
+            transp = transpLst[omicronPos - 1]
         else:
             transp = 25
     elif posFC >= 8:
@@ -130,8 +130,8 @@ def colorNode(gene):
         if t > 6:
             transp = 25
         else:
-            if (genePos + t - 1) < 9:
-                transp = transpLst[(genePos + t - 1)]
+            if (omicronPos + t - 1) < 9:
+                transp = transpLst[(omicronPos + t - 1)]
             else:
                 transp = 25
         posFC = posFC % 7
@@ -162,7 +162,7 @@ def createJS(filename):
         print ("Can't create file!")
         exit()
 
-def main(fcDiction, geDiction, filename):
+def main(fcDiction, omDiction, filename):
     # Variables to hold part of the json text
     top = '{\n\t"elements" : {\n'
     nodetop = '\t\t"nodes" : [\n'
@@ -186,9 +186,9 @@ def main(fcDiction, geDiction, filename):
     # interaction = ""
     # Dictionaries with all the information in them
     global funClasses
-    global geneDiction
+    global omiDiction
     funClasses = fcDiction
-    geneDiction = geDiction
+    omiDiction = omDiction
 
     # Create the JSON file
     jsFile = createJS(filename)
@@ -202,16 +202,16 @@ def main(fcDiction, geDiction, filename):
     jsFile.write(nodetop)
 
     # print the nodes
-    for n, gene in enumerate(geneDiction):
-        print (n, gene)
-        if n == len(geneDiction) - 1:
+    for n, omicron in enumerate(omiDiction):
+        print (n, omicron)
+        if n == len(omiDiction) - 1:
             # last element®
-            nodeTxt = nodeJSON(node, gene)
+            nodeTxt = nodeJSON(node, omicron)
             nodeTxt = nodeTxt + " " + comma + " " + sel
 
             jsFile.write(nodeTxt)
         else:
-            nodeTxt = nodeJSON(node, gene)
+            nodeTxt = nodeJSON(node, omicron)
             nodeTxt = nodeTxt + " " + comma + " " + sel
             jsFile.write(nodeTxt)
             jsFile.write(comma)

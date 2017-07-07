@@ -9,9 +9,9 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 #   Creates the colour of the node based on the PC value of the Functional Class and rank in the class
-#   Input: name of the gene
+#   Input: name of the omicron
 #   Output: a list containing rgb of list of the colour and value of the transparency.
-# def colorNode(gene):
+# def colorNode(omicron):
 #     # dictionary of colour blind safe colours
 #     colors = {"Vermillion": [213, 94, 0], "Orange": [230, 159, 0], "Yellow": [240, 228, 66],
 #               "Bluish Green": [0, 158, 115], "Blue": [0, 114, 178], "Sky Blue": [86, 189, 233],
@@ -19,32 +19,32 @@ from PIL import ImageFont
 #     colList = ["Vermillion", "Orange", "Yellow", "Bluish Green", "Sky Blue", "Blue", "Reddish purple"]
 #     transpLst = [255, 200, 175, 150, 125, 100, 75, 50, 25]
 #
-#     # Get the main functional class a gene belongs to
-#     fcGene = getFC(gene)[0]
+#     # Get the main functional class a omicron belongs to
+#     fcomicron = getFC(omicron)[0]
 #     # rank of function class in evidence network (based on PC value)
 #     posFC = 1
 #     for anchor in funClasses:
-#         if fcGene == anchor:
+#         if fcomicron == anchor:
 #             break
 #         else:
 #             posFC += 1
 #     # Variables
 #     transp = 255
 #     rgb = []
-#     genels = funClasses[fcGene][2]
-#     # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-#     rank = int([i[1] for i in genels if i[0] == gene][0])
-#     totalNumGene = funClasses[fcGene][0][3]
+#     omicronls = funClasses[fcomicron][2]
+#     # Get the rank in functional class for the omicron in the main functional class int(funClasses[fcomicron][2])
+#     rank = int([i[1] for i in omicronls if i[0] == omicron][0])
+#     totalNumomicron = funClasses[fcomicron][0][3]
 #     numOfFc = len(funClasses)
 #     color = ""
-#     # position of gene in subgraph/functional class
-#     genePos = [m[2] for m in funClasses[fcGene][2] if gene == m[0]][0]
+#     # position of omicron in subgraph/functional class
+#     omicronPos = [m[2] for m in funClasses[fcomicron][2] if omicron == m[0]][0]
 #
 #     # Color of the Functional Class
 #     if posFC <= 7:
 #         rgb = colors[(colList[posFC - 1])]
-#         if (genePos-1) < 9:
-#             transp = transpLst[genePos - 1]
+#         if (omicronPos-1) < 9:
+#             transp = transpLst[omicronPos - 1]
 #         else:
 #             transp = 25
 #     elif posFC >= 8:
@@ -52,8 +52,8 @@ from PIL import ImageFont
 #         if t > 6:
 #             transp = 25
 #         else:
-#             if (genePos + t - 1) < 9:
-#                 transp = transpLst[(genePos + t - 1)]
+#             if (omicronPos + t - 1) < 9:
+#                 transp = transpLst[(omicronPos + t - 1)]
 #             else:
 #                 transp = 25
 #         posFC = posFC % 7
@@ -63,7 +63,7 @@ from PIL import ImageFont
 #
 #     return [color, transp]
 
-def buildTxt(funClasses, geneDiction):
+def buildTxt(funClasses, omiDiction):
 
     # Variables
     # Hold the y position of the pen
@@ -77,7 +77,7 @@ def buildTxt(funClasses, geneDiction):
     # Make a image object
     draw = ImageDraw.Draw(img)
 
-    # # Gap to start of the anchor gene
+    # # Gap to start of the anchor omicron
     # startArX = draw.textsize("-00-\t")[0]
 
     #txtFile = open("key.txt", 'w')
@@ -97,7 +97,7 @@ def buildTxt(funClasses, geneDiction):
 
     line1 = ""
 
-   #"Subgraph Rank    Anchor Gene         PC Value")
+   #"Subgraph Rank    Anchor omicron         PC Value")
     for anchor in funClasses:
         position = funClasses[anchor][0][2]
         #postion = posFormat % (position)
@@ -133,6 +133,6 @@ def buildTxt(funClasses, geneDiction):
         #line1 = line1 + line + '\n'
         #print (line)
 
-    img.show()
+    #img.show()
     img.save("key.png")
     #print (line1)

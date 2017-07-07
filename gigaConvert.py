@@ -45,17 +45,17 @@ def mainGiga(outTxt, outGDL):
     # Main code block
 
     # Variables
-    ''' gene_dict is a dictionary that contains information on all the genes
-        gene_dict[gene title]:[id, gene ontology information, overall rank of the gene]
+    ''' omiDiction is a dictionary that contains information on all the genes
+        omiDiction[gene title]:[id, gene ontology information, overall rank of the gene]
     '''
-    global geneDiction
-    geneDiction = {}
-    geneID = 0
+    global omiDiction
+    omiDiction = {}
+    omiID = 0
     ''' funClasses is a dictionary that contains information on each of the functional classes
-        funClasses[functional class/subgraph name]:[[meta],[fcList],[geneList]]
+        funClasses[functional class/subgraph name]:[[meta],[fcList],[omicronList]]
         meta is a list of other metadata 
         fcList is a list of edges [source id, target id, evidence, edge id]
-        geneList is the list of genes in the functional class [title, rank in functional class]
+        omicronList is the list of genes in the functional class [title, rank in functional class]
     '''
     global funClasses
     funClasses = {}
@@ -63,8 +63,8 @@ def mainGiga(outTxt, outGDL):
     meta = []
     # fcList is a list of edges [source id, target id, evidence, edge id]
     fcList = []
-    # geneList is the list of genes in the functional class [title, rank in functional class]
-    geneList = []
+    # omicronList is the list of genes in the functional class [title, rank in functional class]
+    omicronList = []
     subgraph = None
     fcName = None
     numOf = 0
@@ -74,25 +74,25 @@ def mainGiga(outTxt, outGDL):
     # Open the Default text output
     txtOut = openTxt(outTxt)
 
-    # gene_dict[gene title]:[id, gene ontology information, overall rank of the gene]
+    # omiDiction[gene title]:[id, description of omicron, overall rank of the gene]
     # Work through txtOut and get information on the genes and what genes are in which functional classes
     for line in txtOut:
         line = line.rstrip()
         if (line.startswith('total')):
             # end of information load last functional class into funClasses
-            funClasses[fcName] = [meta, geneList]
+            funClasses[fcName] = [meta, omicronList]
             break
         elif re.match('[A-Za-z0-9\s]*\s.*', line) is not None:
             # functional class/subgraph information
             # If not the first functional class complete the last functional class entry
             if fcName is not None:
                 # construct the entry for the funClasses dictionary
-                # print(meta, fcList, geneList)
+                # print(meta, fcList, omicronList)
                 meta.append(numOf)
-                funClasses[fcName] = [meta, geneList]
+                funClasses[fcName] = [meta, omicronList]
                 # print(fcName, "-", p, "-", rFC, "-", title, "-", numOf)
                 meta = []
-                geneList = []
+                omicronList = []
                 numOf = 0
                 rFC += 1
             # get functional class name and  p value, number of genes
@@ -115,17 +115,17 @@ def mainGiga(outTxt, outGDL):
                 if r > numOf:
                     numOf = r
 
-                # add gene to geneDiction
-                if (title not in geneDiction):
-                    goName = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
+                # add gene to omiDiction
+                if (title not in omiDiction):
+                    description = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
                     rankAll = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s.*\s[0-9]*\s([0-9]*)', line)[0]
-                    geneDiction[title] = [geneID, goName, rankAll]
-                    geneID += 1
-                # add gene to geneList
+                    omiDiction[title] = [omiID, description, rankAll]
+                    omiID += 1
+                # add gene to omicronList
                 rankFC = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s.*\s([0-9]*)\s[0-9]*', line)[0]
-                geneList.append([title, rankFC, r])
+                omicronList.append([title, rankFC, r])
                 meta = [fcName, p, rFC, maxR]
-            # geneDiction and geneList information
+            # omiDiction and omicronList information
             elif (line.startswith('-')):
                 title = re.findall('[-][0-9]+[-]\s([A-Z0-9]*)\s.*', line)[0]
                 r = re.findall('[-]([0-9]+)[-]\s.*', line)[0]
@@ -133,19 +133,15 @@ def mainGiga(outTxt, outGDL):
                 if r > numOf:
                     numOf = r
 
-                # add gene to geneDiction
-                if (title not in geneDiction):
-                    goName = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
+                # add gene to omiDiction
+                if (title not in omiDiction):
+                    description = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
                     rankAll = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s.*\s[0-9]*\s([0-9]*)', line)[0]
-                    geneDiction[title] = [geneID, goName, rankAll]
-                    geneID += 1
-                # add gene to geneList
+                    omiDiction[title] = [omiID, description, rankAll]
+                    omiID += 1
+                # add gene to omicronList
                 rankFC = re.findall('[-][0-9]+[-]\s[A-Z0-9]*\s.*\s([0-9]*)\s[0-9]*', line)[0]
-                geneList.append([title, rankFC, r])
-
-
-    #   There is a bug in GIGA.pl that it sometimes miss labels the anchor genes. This fixes the dictionaries.
-
+                omicronList.append([title, rankFC, r])
 
     # close the text file
     txtOut.close()
@@ -154,7 +150,7 @@ def mainGiga(outTxt, outGDL):
     gdlOut = openGDL(outGDL)
 
     # id for the edges
-    edgeID = geneID + 1
+    edgeID = omiID + 1
 
     anchors = ([anchor for anchor in funClasses])
     fcNum = 0
@@ -162,7 +158,7 @@ def mainGiga(outTxt, outGDL):
     # work through gdlOut to get edges for each functional class
     # Information to make up the edges
     # Build up the functional class dictionary
-    # funClasses[functional class/subgraph name]:[[meta],[fcList],[geneList]]
+    # funClasses[functional class/subgraph name]:[[meta],[fcList],[omicronList]]
     for line in gdlOut:
         # Get a new Functional Class/subgraph
         if re.match(r'graph:.*"SUBGRAPH ', line) is not None:
@@ -171,8 +167,8 @@ def mainGiga(outTxt, outGDL):
             if subgraph is not None:
                 # add a id to each edge
                 for k in range(0, len(fcList), 1):
-                    fcList[k].append(geneID)
-                    geneID += 1
+                    fcList[k].append(omiID)
+                    omiID += 1
                 # print(subgraph)
                 # print(funClasses[subgraph])
                 funClasses[subgraph].insert(1, fcList)
@@ -182,12 +178,12 @@ def mainGiga(outTxt, outGDL):
             fcNum += 1
         # Get name of source gene
         elif re.match(r'node:.*title: "[^VIRTUAL].*label', line) is not None:
-            geneTitle = re.findall(r'title: "([^"]*)"', line)[0]
+            omiTitle = re.findall(r'title: "([^"]*)"', line)[0]
         # For each gene in Functional Class get id of source and target gene and use this to build edges
         elif re.match(r'edge:.*', line) is not None:
             if re.match(r'edge:.*source:"[^VIRTUAL]', line):
-                id1 = geneDiction[geneTitle][0]
-                id2 = geneDiction[re.findall(r'.*source:"(\S*)"', line)[0]][0]
+                id1 = omiDiction[omiTitle][0]
+                id2 = omiDiction[re.findall(r'.*source:"(\S*)"', line)[0]][0]
                 # Sort id's by size
                 if id1 > id2:
                     n = id1
@@ -203,8 +199,8 @@ def mainGiga(outTxt, outGDL):
     # Add last FC to dictionary
     # add a id to each edge
     for k in range(0, len(fcList), 1):
-        fcList[k].append(geneID)
-        geneID += 1
+        fcList[k].append(omiID)
+        omiID += 1
     funClasses[subgraph].insert(1, fcList)
     fcList = []
 
@@ -212,6 +208,18 @@ def mainGiga(outTxt, outGDL):
     gdlOut.close()
 
     fcs = 0
+
+    # Calculate weight of omicron
+    # Ammend omiDiction with the weight of each node
+    for omicron in omiDiction:
+        weight = 0
+        id = omiDiction[omicron][0]
+        for subgraph in funClasses:
+            for edge in funClasses[subgraph][1]:
+                if id in edge:
+                    weight += 1
+        # add weight to omiDiction
+        omiDiction[omicron].append(weight)
 
     # Print the funClasses
     # for gene in funClasses:
@@ -223,7 +231,7 @@ def retFC():
     return funClasses
 
 def retGD():
-    return geneDiction
+    return omiDiction
 
 
 
