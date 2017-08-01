@@ -34,7 +34,6 @@ import key
 import htmlgraphs
 import gml_create
 
-
 def checkFileExist(args):
     """ Check if all necessary files exist.
 
@@ -64,12 +63,27 @@ def checkFileExist(args):
             print("Can't find annotation file.")
         exit()
 
+def is_int(mStr):
+    """ Confirm if a string can be converted into a integer.
+
+        Return:
+            True if string can be converted.
+            False if it cannot be converted.
+        Raises:
+            Try/except block will catch a ValueError if string cannot be converted into a integer.
+        """
+    try:
+        int(mStr)
+        return True
+    except ValueError:
+        return False
+
 def main(args):
-    """ Main function takes arguments and calls modules to create requied
-    visualisation file.
+    """Main function takes arguments and calls modules to create
+    required visualisation file.
 
         Args:
-            Takes an parsed argument parser object."""
+            Takes an parsed argparse parser object."""
 
     # Name to be used for all future files
     fileName = args.out
@@ -97,14 +111,23 @@ def main(args):
     #   Check to see if the files exist or not
     checkFileExist(args)
 
+    # Create basic arguments for the Perl GiGA call
+    giga = ['perl', 'giga.pl', dataAddress, networkAddress, namesAddress, '-Ftxt', outTxt]
+    gigaTxt = ['perl', 'giga.pl', dataAddress, networkAddress, namesAddress, '-Fgdl', outGDL]
+
+    #   Append call to Perl GiGA depending on arguments
+    if args.m is not None and is_int(args.m):
+        giga.append("-M " + args.m)
+
+    if args.r:
+        giga.append("-R")
+
     # Run perl GIGA program to get gdl file
-    giga = ['perl','giga.pl', dataAddress, networkAddress, namesAddress, '-Ftxt',outTxt]
     subprocess.call(giga)
     # Run perl GIGA program again to get the default text file
-    gigaTxt = ['perl','giga.pl', dataAddress, networkAddress, namesAddress, '-Fgdl',outGDL]
     subprocess.call(gigaTxt)
 
-    # Make filenames to pass to dictionary
+    # Make filenames to pass to dictionary by stripping Perl GiGA flags from variable.
     outTxt = outTxt[2:]
     outGDL = outGDL[2:]
 
@@ -126,7 +149,6 @@ def main(args):
             # Need to use argument name for filename
             outJson = fileName + ".cyjs"
             json_create.main(funClasses, omiDiction, outJson)
-
             # Build the key file in text
             key.buildTxt(funClasses, omiDiction)
         else:
@@ -149,6 +171,9 @@ parser.add_argument("-s", "--sparce",  action="store_true", help="Use a sparce n
 parser.add_argument("-nh", "--nohtml",  action="store_true", help="Do not make the html summary file.")
 parser.add_argument("-gml",  action="store_true", help="Make a gml rather than cytoscape JSON file.")
 parser.add_argument("--html",  action="store_true", help="Only make the html")
+parser.add_argument("-m", action="store", help="Set the maximum size of the sub-graphs. Default is 20 omicrons.")
+parser.add_argument("-r", action="store_true", help="See the results of a random permutation of the data.")
+parser.add_argument("-j", action="store_true", help="Output sub-graphs as plain JSON files.")
 
 #   Default to load the yeast data
 parser.add_argument("-d", "--default", action="store_true", help="Load default data")
