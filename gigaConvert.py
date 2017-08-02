@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
+""" Takes data from the GIGA.pl Perl program and puts it in data frames that can be used to make graph files
+    that can be used by network visualisation software.
 
+    Robin Shaw
+    June 2017
+
+    Args:
+        Filename of Perl GiGA.pl text data file
+        Filename of Perl GiGA.pl gdl data file
 """
-gigaConvert takes data from the GIGA.pl Pearl program and puts it in data frames that can be used to make
-graph files that can be used by network visualisation software.
-Robin Shaw
-June 2017
-"""
-# Packages
+
+""" Import regular expressions re module"""
 import re
 
 
 # Functions
-''' 
-    Load text GIGA output into an file object
-    Input - none
-    Output - file object
-'''
 def openTxt(outTxt):
+    """Load GiGA.pl text data file into an file object.
+
+        Args:
+            Filename of text data file.
+
+        Returns:
+            File object of text data file.
+    """
     try:
         txtFile = open(outTxt, "r")
         return txtFile
@@ -24,12 +31,15 @@ def openTxt(outTxt):
         print ("Sorry, Giga out text file not found.")
         exit()
 
-''' 
-    Load gdl GIGA output into an file object
-    Input - none
-    Output - file object
-'''
 def openGDL(outGDL):
+    """ Load GiGA.pl gdl data file into an file object
+
+        Args:
+            gdl filename.
+
+        Returns:
+            File object of gdl data file.
+    """
     try:
         gdlFile = open(outGDL, "r")
         return gdlFile
@@ -37,49 +47,72 @@ def openGDL(outGDL):
         print("Sorry, file not found.")
         exit()
 
+#   Check if there the anchor omicon is already used by another subgraph
+def checkAnchor(fcName):
+    """ Check if there the anchor omicon is already used by
+    another subgraph. If so add '-' to end of name.
 
-''' 
-Main code block to fill dictionaries
-'''
+        Args:
+            Omicon name as string variable.
+
+        Returns:
+            Omicon name as string variable. Either changed or not
+    """
+    if fcName in funClasses:
+        fcName = fcName + '-'
+        checkAnchor(fcName)
+
+    return fcName
+
+
 def mainGiga(outTxt, outGDL):
-    # Main code block
+    """Main function to control the flow of the program.
+
+    Args:
+        String variable of the Filename of the text data file.
+        String variable of the Filename of the gdl data file."""
 
     # Variables
-    ''' omiDiction is a dictionary that contains information on all the genes
-        omiDiction[gene title]:[id, gene ontology information, overall rank of the gene]
-    '''
+    """ omiDiction is a dictionary that contains information on all the omicons
+        omiDiction[omicon title]:[id, omicon ontology information, overall rank of the omicon]
+    """
     global omiDiction
     omiDiction = {}
     omiID = 0
-    ''' funClasses is a dictionary that contains information on each of the functional classes
+    """ funClasses is a dictionary that contains information on each of the functional classes
         funClasses[functional class/subgraph name]:[[meta],[fcList],[omiconList]]
         meta is a list of other metadata 
         fcList is a list of edges [source id, target id, evidence, edge id]
-        omiconList is the list of genes in the functional class [title, rank in functional class]
-    '''
+        omiconList is the list of omicons in the functional class [title, rank in functional class]
+    """
     global funClasses
     funClasses = {}
     # meta = [title, p, maxR, numOf]
     meta = []
     # fcList is a list of edges [source id, target id, evidence, edge id]
     fcList = []
-    # omiconList is the list of genes in the functional class [title, rank in functional class]
+    # omiconList is the list of omicons in the functional class [title, rank in functional class]
     omiconList = []
     subgraph = None
     fcName = None
     numOf = 0
     rFC = 1
 
-
     # Open the Default text output
     txtOut = openTxt(outTxt)
 
-    # omiDiction[gene title]:[id, description of omicon, overall rank of the gene]
-    # Work through txtOut and get information on the genes and what genes are in which functional classes
+    # omiDiction[omicon title]:[id, description of omicon, overall rank of the omicon]
+    # Work through txtOut and get information on the omicons 
+    # and what omicons are in which functional classes.
     for line in txtOut:
         line = line.rstrip()
+
         if (line.startswith('total')):
             # end of information load last functional class into funClasses
+
+            #   If the anchor omicon is already read used add '-' extension
+            fcName = checkAnchor(fcName)
+
             funClasses[fcName] = [meta, omiconList]
             break
         elif re.match('[A-Za-z0-9\s]*\s.*', line) is not None:
@@ -87,25 +120,24 @@ def mainGiga(outTxt, outGDL):
             # If not the first functional class complete the last functional class entry
             if fcName is not None:
                 # construct the entry for the funClasses dictionary
-                # print(meta, fcList, omiconList)
+
+                #   If the anchor omicon is already used call 
+                # checkAnchor() to add '-' extension to name.
+                fcName = checkAnchor(fcName)
+
                 meta.append(numOf)
                 funClasses[fcName] = [meta, omiconList]
-                # print(fcName, "-", p, "-", rFC, "-", title, "-", numOf)
                 meta = []
                 omiconList = []
                 numOf = 0
                 rFC += 1
-            # get functional class name and  p value, number of genes
-            #fcName = re.findall('^([A-Za-z0-9]*)\s.*', line)[0]
+            # Get functional class name, p value, 
+            # and number of omicons in subgraph.
             p = re.findall('.*\s([0-9e.-]+)\s[0-9]+', line)[0]
-            #title = re.findall('^[A-Za-z0-9]*\s([\s\S]*)\s[0-9.e-]+\s.*', line)[0]
-            # Fix a quirk in the default text that some times splits the title into two
-            # if '\t' in title:
-            #     title = re.findall('([A-Za-z0-9\s\S]*)\t.*', title)[0]
             maxR = re.findall('.*\s([0-9]*)', line)[0]
 
             # create meta list
-            #meta = [title, p, rFC, maxR]
+            # meta = [title, p, rFC, maxR]
         elif (line.startswith('-')):
             if (line.startswith('-1-')):
                 fcName = re.findall('[-][0-9]+[-]\s([A-Za-z0-9]*)\s.*', line)[0]
@@ -115,13 +147,14 @@ def mainGiga(outTxt, outGDL):
                 if r > numOf:
                     numOf = r
 
-                # add gene to omiDiction
+                # add omicon to omiDiction
                 if (title not in omiDiction):
                     description = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
                     rankAll = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s.*\s[0-9]*\s([0-9]*)', line)[0]
                     omiDiction[title] = [omiID, description, rankAll]
                     omiID += 1
-                # add gene to omiconList
+
+                # add omicson to omiconList
                 rankFC = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s.*\s([0-9]*)\s[0-9]*', line)[0]
                 omiconList.append([title, rankFC, r])
                 meta = [fcName, p, rFC, maxR]
@@ -133,20 +166,20 @@ def mainGiga(outTxt, outGDL):
                 if r > numOf:
                     numOf = r
 
-                # add gene to omiDiction
+                # add omicon to omiDiction
                 if (title not in omiDiction):
                     description = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s(.*)\s[0-9]*\s[0-9]*', line)[0]
                     rankAll = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s.*\s[0-9]*\s([0-9]*)', line)[0]
                     omiDiction[title] = [omiID, description, rankAll]
                     omiID += 1
-                # add gene to omiconList
+                # add omicon to omiconList
                 rankFC = re.findall('[-][0-9]+[-]\s[A-Za-z0-9]*\s.*\s([0-9]*)\s[0-9]*', line)[0]
                 omiconList.append([title, rankFC, r])
 
     # close the text file
     txtOut.close()
 
-    # Open gdl file and build network between genes(nodes) in functional classes
+    # Open gdl data file and build network between omicons(nodes) in functional classes.
     gdlOut = openGDL(outGDL)
 
     # id for the edges
@@ -155,9 +188,9 @@ def mainGiga(outTxt, outGDL):
     anchors = ([anchor for anchor in funClasses])
     fcNum = 0
 
-    # work through gdlOut to get edges for each functional class
-    # Information to make up the edges
-    # Build up the functional class dictionary
+    # Work through gdlOut to get edges for each functional class,
+    # information to make up the edges, and
+    # build up the functional class dictionary.
     # funClasses[functional class/subgraph name]:[[meta],[fcList],[omiconList]]
     for line in gdlOut:
         # Get a new Functional Class/subgraph
@@ -168,18 +201,15 @@ def mainGiga(outTxt, outGDL):
                 # add a id to each edge
                 for k in range(0, len(fcList), 1):
                     fcList[k].append(omiID)
-                    omiID += 1
-                # print(subgraph)
-                # print(funClasses[subgraph])
                 funClasses[subgraph].insert(1, fcList)
                 fcList = []
             # Get title and metadata about the subgraph
             subgraph = anchors[fcNum]
             fcNum += 1
-        # Get name of source gene
+        # Get name of source omicon
         elif re.match(r'node:.*title: "[^VIRTUAL].*label', line) is not None:
             omiTitle = re.findall(r'title: "([^"]*)"', line)[0]
-        # For each gene in Functional Class get id of source and target gene and use this to build edges
+        # For each omicon in Functional Class get id of source and target omicon and use this to build edges
         elif re.match(r'edge:.*', line) is not None:
             if re.match(r'edge:.*source:"[^VIRTUAL]', line):
                 id1 = omiDiction[omiTitle][0]
@@ -196,8 +226,8 @@ def mainGiga(outTxt, outGDL):
                 if edge not in fcList:
                     fcList.append(edge)
 
-    # Add last FC to dictionary
-    # add a id to each edge
+    # Add the last Functional Class to the dictionary and
+    # add a id to each edge.
     for k in range(0, len(fcList), 1):
         fcList[k].append(omiID)
         omiID += 1
@@ -207,40 +237,32 @@ def mainGiga(outTxt, outGDL):
     # close file
     gdlOut.close()
 
-    fcs = 0
-
-    # # Calculate weight of omicon in each subgraph
-    # # Ammend list with the weight of each node
-    # for anchor in funClasses:
-    #     omiList = funClasses[anchor][2]
-    #     edgeList = funClasses[anchor][1]
-    #
-    #     # Check how many edges the omicon belongs to
-    #     for omicon in omiList:
-    #
-    #         for edge in edgeList:
-    #             source = edge[0]
-    #             target = edge[1]
+    # # Calculate degree for each omicon in each subgraph
     for omicon in omiDiction:
-        weight = 0
+        degree = 0
         id = omiDiction[omicon][0]
         for subgraph in funClasses:
             for edge in funClasses[subgraph][1]:
                 if id == edge[0] or id == edge[1]:
-                    weight += 1
+                    degree += 1
         # add weight to omiDiction
-        omiDiction[omicon].append(weight)
+        omiDiction[omicon].append(degree)
 
-    # Print the funClasses
-    # for gene in funClasses:
-    #     print(gene)
-    #     for ls in funClasses[gene]:
-    #         print(ls)
 
 def retFC():
+    """ Returns the funClasses dictionary data structure. This contains
+    information on all the sub-graphs/functional classes.
+
+    Returns:
+        funClasses data structure"""
     return funClasses
 
 def retGD():
+    """Returns the omiDiction data structure. This contains information on
+    all the omicons.
+
+    Returns:
+        omiDiction"""
     return omiDiction
 
 
