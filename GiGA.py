@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Python wrapper for the creation of GIGA subgraphs.
 Can create .gml and .cyjs files for visualisation Software.
-Also can make a summary html file
+Also can make a summary HTML file
 Created on Mon May 29 20:12:57 2017
 
 @author: Robin Shaw
@@ -79,12 +79,12 @@ def is_int(mStr):
         return False
 
 def main(args):
-    """Main function takes arguments and calls modules to create
+    """ Main function takes arguments and calls modules to create
     required visualisation file.
 
-        Args:
-            Takes an parsed argparse parser object."""
-
+    :param args: Takes an parsed argparse parser object.
+    :return:
+    """
     # Name to be used for all future files
     fileName = args.out
 
@@ -131,16 +131,28 @@ def main(args):
     outTxt = outTxt[2:]
     outGDL = outGDL[2:]
 
+    #   Check if sub-graphs are found
+    check_line = 0
+    with open(outTxt) as f:
+        for i, l in enumerate(f):
+            check_line +=1
+
+    if check_line < 2:
+        print("No sub-graphs found.")
+        exit()
+
     # extract giga.pl information into dictionaries
     gigaConvert.mainGiga(outTxt, outGDL)
     funClasses = gigaConvert.retFC()
     omiDiction = gigaConvert.retGD()
 
+    #   Delete GiGA.pl files
+    os.remove(outTxt)
+    os.remove(outGDL)
+
     #   Unless flagged make html summary page
     if not args.nohtml:
         htmlgraphs.main(funClasses, omiDiction, fileName)
-        # Open the html in a browser
-        # use the webbrowser module
 
     # If only making the html file skip making the graph files
     if not args.html:
@@ -153,7 +165,7 @@ def main(args):
             key.buildTxt(funClasses, omiDiction)
         else:
             # Convert output to gml - need to fix this
-            gml_create()
+            gml_create.main(funClasses, omiDiction, 'gmlOut')
 
 """ Use argparse to extract the arguments from the command line."""
 #   Get arguments from the command line or run with defaults
@@ -170,7 +182,7 @@ parser.add_argument("out", help="Name of output (no extension required")
 parser.add_argument("-s", "--sparce",  action="store_true", help="Use a sparce network.")
 parser.add_argument("-nh", "--nohtml",  action="store_true", help="Do not make the html summary file.")
 parser.add_argument("-gml",  action="store_true", help="Make a gml rather than cytoscape JSON file.")
-parser.add_argument("--html",  action="store_true", help="Only make the html")
+parser.add_argument("--html",  action="store_true", help="Only make the html summary file.")
 parser.add_argument("-m", action="store", help="Set the maximum size of the sub-graphs. Default is 20 omicrons.")
 parser.add_argument("-r", action="store_true", help="See the results of a random permutation of the data.")
 parser.add_argument("-j", action="store_true", help="Output sub-graphs as plain JSON files.")

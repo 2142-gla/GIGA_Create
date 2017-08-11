@@ -1,95 +1,67 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Take GIGA information and create a JSON file suitable for Cytoscape 
+""" Take GiGA information and create a JSON cyjs file suitable for Cytoscape.
 
 """
 
-# Make a json file
-def nodeJSON(node, gene):
-    # Make nodes
-    # if gene is a key in funClasses then it is a an anchor gene\
-    idnum = geneDiction[gene][0]
-    name = gene
-    description = geneDiction[gene][1]
-    shape = shapeNode(gene)
-    colour = colorNode(gene)
 
-    geneDetails = [gd for gd in funClasses[getFC(gene)[0]][2] if gene in gd][0]
-    print (geneDetails)
-    rankAll = geneDiction[gene][2]
-    rankFC = geneDetails[1]
+def nodeJSON(node, omicon):
+    """ Make nodes for the JSON file
+     If omicon is a key in funClasses then it is an anchor omicon
 
-    meta = str(geneDetails[2]) + ": "+ geneDiction[gene][1]
+    Args:
+        node - a string containing JSON text for nodes with string format markers
+        omicon - the title of the omicon in string format
 
-    # node: id, name, description, shape, background colour, transparency, meta information
-    #print ((node) % (idnum, name, description, shape, colour[0], colour[1], meta))
+    Returns:
+        node - a string of the node JSON text for the omicon.
+     """
+    idnum = omiDiction[omicon][0]
+    name = omicon
+    description = omiDiction[omicon][1]
+    shape = shapeNode(omicon)
+    colour = colorNode(omicon)
+
+    omiconDetails = [gd for gd in funClasses[getFC(omicon)[0]][2] if omicon in gd][0]
+    rankAll = omiDiction[omicon][2]
+    rankFC = omiconDetails[1]
+    meta = str(omiconDetails[2]) + ": "+ omiDiction[omicon][1]
+
     return ((node) % (idnum, name, description, rankAll, rankFC, shape, colour[0], colour[1], meta))
 
-#   Check of the gene is a anchor gene
-#   Input: name of the gene
-#   Output: Shape of the node
-def shapeNode(gene):
+def shapeNode(omicon):
+    """ Check if the omicon is an acnhor omicon
+
+    :param omicon: string name of the omicon
+    :return: String name of the shape the node should take.
+    """
     anchors = [anchor for anchor in funClasses]
-    if gene in anchors:
+    if omicon in anchors:
         return "Rounded Rectangle"
     else:
         return "Ellipse"
 
-#   From a gene title get the functional classes it belongs to. The functional class are sorted by smallest p
-#   Input: gene title
-#   Output: list of names of functional classes
-def getFC(gene):
+def getFC(omicon):
+    """ From a omicon title get the functional classes it belongs to. The functional class are sorted by smallest p
+
+    :param omicon: string name of the omicon
+    :return: list of omicon names in functional class/sub-graph
+    """
     fcGroup = []
-    # Check if gene is in the geneList of each Functional Class
+    # Check if omicon is in the omiconList of each Functional Class
     for key in funClasses:
-        # If gene found in gene list add the name of the functional class to the fcGroup
-        if any(gene in genelist for genelist in funClasses[key][2]):
+        # If omicon found in omicon list add the name of the functional class to the fcGroup
+        if any(omicon in omiconlist for omiconlist in funClasses[key][2]):
             fcGroup.append(key)
-        #     print(gene, "found")
-        # else:
-        #     print (gene,"not found")
-    #print ("getFC", fcGroup)
+
     return fcGroup
 
-# #   Create the metadata for the tooltip. This will depend on wither the gene is a anchor or normal gene
-# #   Input: gene and shape
-# #   Output: string format for meta data
-# def metaNode(gene, shape):
-#     #print ('metaNode calls getFC')
-#     fcGroup = getFC(gene)
-#
-#     # Need to calculate rank in fc
-#     genels = funClasses[fcGroup[0]][2]
-#     # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-#     rank = int([i[1] for i in genels if i[0] == gene][0])
-#     m = 0
-#
-#     if shape == "Ellipse" and len(fcGroup) > 1:
-#         metaFor = ("%s Rank of Gene Overall: %s ") % (gene, geneDiction[gene][2])
-#         for fc in fcGroup:
-#             genels = funClasses[fcGroup[m]][2]
-#             # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-#             rank = int([i[1] for i in genels if i[0] == gene][0])
-#             addMeta = " Rank in Functional Class %s: %s. " % (fc, funClasses[fc][2][1])
-#             metaFor = metaFor + addMeta
-#             m += 1
-#     elif shape == "Ellipse":
-#         metaFor = "%s Rank of Gene Overall: %s. Rank in Functional Class %s: %s"
-#         metaFor = metaFor % (geneDiction[gene][1], geneDiction[gene][2], fcGroup[0], rank)
-#     else:
-#         metaFor = "Subgraph Description: %s. P value: %s. Number of Genes in Class: %s. "
-#         metaFor = metaFor % (funClasses[fcGroup[0]][0][0], funClasses[fcGroup[0]][0][1], rank)
-#         anchor = "Anchor gene description %s Rank of Gene Overall: %s. Rank in Functional Class %s: %s."
-#         anchor = anchor % (geneDiction[gene][1], geneDiction[gene][2], fcGroup[0], rank)
-#         metaFor = metaFor + anchor
-#
-#     return metaFor
+def colorNode(omicon):
+    """ Creates the colour of the node based on the p-value value of the Functional Class and rank in the class
 
-#   Creates the colour of the node based on the PC value of the Functional Class and rank in the class
-#   Input: name of the gene
-#   Output: a list containing rgb of list of the colour and value of the transparency.
-def colorNode(gene):
+    :param omicon: string name of the omicon
+    :return: a list containing rgb of list of the colour and value of the transparency.
+    """
     # dictionary of colour blind safe colours
     colors = {"Vermillion": [213, 94, 0], "Orange": [230, 159, 0], "Yellow": [240, 228, 66],
               "Bluish Green": [0, 158, 115], "Blue": [0, 114, 178], "Sky Blue": [86, 189, 233],
@@ -97,32 +69,32 @@ def colorNode(gene):
     colList = ["Vermillion", "Orange", "Yellow", "Bluish Green", "Sky Blue", "Blue", "Reddish purple"]
     transpLst = [255, 200, 175, 150, 125, 100, 75, 50, 25]
 
-    # Get the main functional class a gene belongs to
-    fcGene = getFC(gene)[0]
-    # rank of function class in evidence network (based on PC value)
+    # Get the main functional class the omicon belongs to
+    fcomicon = getFC(omicon)[0]
+    # rank of function class in evidence network (based on p-value value)
     posFC = 1
     for anchor in funClasses:
-        if fcGene == anchor:
+        if fcomicon == anchor:
             break
         else:
             posFC += 1
     # Variables
     transp = 255
     rgb = []
-    genels = funClasses[fcGene][2]
-    # Get the rank in functional class for the gene in the main functional class int(funClasses[fcGene][2])
-    rank = int([i[1] for i in genels if i[0] == gene][0])
-    totalNumGene = funClasses[fcGene][0][3]
+    omiconls = funClasses[fcomicon][2]
+    # Get the rank in functional class for the omicon in the main functional class int(funClasses[fcomicon][2])
+    rank = int([i[1] for i in omiconls if i[0] == omicon][0])
+    totalNumomicon = funClasses[fcomicon][0][3]
     numOfFc = len(funClasses)
     color = ""
-    # position of gene in subgraph/functional class
-    genePos = [m[2] for m in funClasses[fcGene][2] if gene == m[0]][0]
+    # position of omicon in subgraph/functional class
+    omiconPos = [m[2] for m in funClasses[fcomicon][2] if omicon == m[0]][0]
 
     # Color of the Functional Class
     if posFC <= 7:
         rgb = colors[(colList[posFC - 1])]
-        if (genePos-1) < 9:
-            transp = transpLst[genePos - 1]
+        if (omiconPos-1) < 9:
+            transp = transpLst[omiconPos - 1]
         else:
             transp = 25
     elif posFC >= 8:
@@ -130,8 +102,8 @@ def colorNode(gene):
         if t > 6:
             transp = 25
         else:
-            if (genePos + t - 1) < 9:
-                transp = transpLst[(genePos + t - 1)]
+            if (omiconPos + t - 1) < 9:
+                transp = transpLst[(omiconPos + t - 1)]
             else:
                 transp = 25
         posFC = posFC % 7
@@ -141,28 +113,57 @@ def colorNode(gene):
 
     return [color, transp]
 
+def getTitle(idOmi):
+    """ Get the name of the omicon from its id.
+
+    :param idOmi: integer id of the omicon
+    :return: String of the name of the omicon or -1 if not found.
+    """
+    for title in omiDiction:
+        if omiDiction[title][0] == idOmi:
+            return title
+    else:
+        return "-1"
+
 def edgeJSON(text, link):
+    """ Make the text for an edge in JSON format.
+
+    :param text: String containing JSON text for edges and markers for string format.
+    :param link: List containing edge information.
+    :return: edgeFor: String containing formated JSON text for edge.
+    """
     # make edge
     edgeID = link[3]
     source = link[0]
     target = link[1]
     interaction = link[2]
-    name = '%s %s %s' % (source, interaction, target)
+    sourceName = getTitle(source)
+    targetName = getTitle(target)
+    name = '%s %s %s' % (sourceName, interaction, targetName)
     edgeFor = text % (edgeID, name, source, target, interaction)
     return edgeFor
 
-#   Open a file to make the json file
-#   Input: None
-#   Output: file object
-def createJS():
+def createJS(filename):
+    """ Creates the file object for the cyjs file.
+
+    :raise File exception if you can't find the file and closes the program.
+    :param filename: String name of the file.
+    :return: File object
+    """
     try:
-        jsFile = open("eviNetwork02.cyjs", 'w')
+        jsFile = open(filename, 'w')
         return jsFile
     except:
         print ("Can't create file!")
         exit()
 
-def main(fcDiction, geDiction):
+def main(fcDiction, omDiction, filename):
+    """ Main function for the program.  Creates the JSON cyjs file and calls helper methods.
+
+    :param fcDiction: Dictionary data structure containing information about the sub-graphs/functional classes.
+    :param omDiction: Dictionary data structure containing information about each node.
+    :param filename: String to be used as name of JSON cyjs file.
+    """
     # Variables to hold part of the json text
     top = '{\n\t"elements" : {\n'
     nodetop = '\t\t"nodes" : [\n'
@@ -175,57 +176,42 @@ def main(fcDiction, geDiction):
     edge = '\n\t\t{\n\t\t"data" : {\n\t\t\t"id" : "%s",\n\t\t\t"name" : "%s",\n\t\t\t"source" : "%s",\n\t\t\t"target" : "%s",\n\t\t\t"interaction" : "%s",\n\t\t\t"selected" : false\n\t\t}'
     end = '\n\t}\n}'
     sel = '\t\t"selected" : false\n\t\t}'
-    # variables to hold information to put in json text
-    # idnum = ""
-    # name = ""
-    # go = ""
-    # shape = ""
-    # meta = ""
-    # source = ""
-    # target = ""
-    # interaction = ""
-    # Dictionaries with all the information in them
+
     global funClasses
-    global geneDiction
+    global omiDiction
     funClasses = fcDiction
-    geneDiction = geDiction
+    omiDiction = omDiction
 
     # Create the JSON file
-    jsFile = createJS()
+    jsFile = createJS(filename)
 
-    # print out and create json file
-    print(top, end='')
+    # Write top text for JSON file
     jsFile.write(top)
 
-    # print node section
-    print(nodetop, end='')
+    # Write top of node section text for JSON file
     jsFile.write(nodetop)
 
-    # print the nodes
-    for n, gene in enumerate(geneDiction):
-        print (n, gene)
-        if n == len(geneDiction) - 1:
-            # last element®
-            nodeTxt = nodeJSON(node, gene)
+    # Write the nodes
+    for n, omicon in enumerate(omiDiction):
+        if n == len(omiDiction) - 1:
+            # last element
+            nodeTxt = nodeJSON(node, omicon)
             nodeTxt = nodeTxt + " " + comma + " " + sel
 
             jsFile.write(nodeTxt)
         else:
-            nodeTxt = nodeJSON(node, gene)
+            nodeTxt = nodeJSON(node, omicon)
             nodeTxt = nodeTxt + " " + comma + " " + sel
             jsFile.write(nodeTxt)
             jsFile.write(comma)
 
     # close the nodes
-    #print(close + comma, end='')
     jsFile.write(close + comma)
 
-
     # Start the edges
-    #print(edgetop, end='')
     jsFile.write(edgetop)
 
-    # print edge section
+    # Write edge section
     for o, item in enumerate(funClasses):
         fcList = funClasses[item][1]
         for m, link in enumerate(fcList):
@@ -234,19 +220,15 @@ def main(fcDiction, geDiction):
                 edgeTxt = edgeJSON(edge, link) + " " + comma + " " + sel
                 jsFile.write(edgeTxt)
             else:
-                #print(edgeJSON(edge, link), comma, sel, end='')
                 edgeTxt = edgeJSON(edge, link) + " " + comma + " " + sel
                 jsFile.write(edgeTxt)
-                #print(comma, end='')
                 jsFile.write(comma)
 
 
-    #print(close, end='')
+    # Write end of edges
     jsFile.write(close)
-    # footer
-    #print(end)
+    # Write footer
     jsFile.write(end)
 
     # close the json file
     jsFile.close()
-

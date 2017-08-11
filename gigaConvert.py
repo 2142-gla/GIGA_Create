@@ -47,7 +47,6 @@ def openGDL(outGDL):
         print("Sorry, file not found.")
         exit()
 
-#   Check if there the anchor omicon is already used by another subgraph
 def checkAnchor(fcName):
     """ Check if there the anchor omicon is already used by
     another subgraph. If so add '-' to end of name.
@@ -191,7 +190,7 @@ def mainGiga(outTxt, outGDL):
     # Work through gdlOut to get edges for each functional class,
     # information to make up the edges, and
     # build up the functional class dictionary.
-    # funClasses[functional class/subgraph name]:[[meta],[fcList],[omiconList]]
+    # funClasses[anchor/subgraph name]:[[meta],[fcList],[omiconList]]
     for line in gdlOut:
         # Get a new Functional Class/subgraph
         if re.match(r'graph:.*"SUBGRAPH ', line) is not None:
@@ -237,7 +236,7 @@ def mainGiga(outTxt, outGDL):
     # close file
     gdlOut.close()
 
-    # # Calculate degree for each omicon in each subgraph
+    # Calculate degree for each omicon in each subgraph
     for omicon in omiDiction:
         degree = 0
         id = omiDiction[omicon][0]
